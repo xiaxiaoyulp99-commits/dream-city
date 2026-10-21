@@ -1,4 +1,46 @@
 <!doctype html>
+<div style="border: 3px solid red; padding: 10px; margin: 10px; background: #fff; position: relative; z-index: 9999;">
+    <div id="chat-history" style="height: 120px; overflow-y: scroll; border: 1px solid #ddd; margin-bottom: 10px; padding: 5px; font-size: 14px;"></div>
+    <input type="text" id="chat-input" placeholder="输入内容测试..." style="width: 65%; padding: 8px;">
+    <button id="send-btn" style="padding: 8px 15px; background: #333; color: white; border: none;">发送</button>
+</div>
+
+<script>
+    // ⚠️ 注意这里：把你刚才复制的 sk- 开头的密钥，填在下面的两个单引号中间！
+    const MY_KEY = 'sk-20523c29053b4d5eb9f04cd1a766389d'; 
+
+    document.getElementById('send-btn').onclick = async () => {
+        const input = document.getElementById('chat-input');
+        const msg = input.value.trim();
+        if (!msg) return;
+        
+        const history = document.getElementById('chat-history');
+        history.innerHTML += `<div style="text-align:right; color: #333;"><b>你：</b>${msg}</div>`;
+        input.value = '';
+
+        try {
+            const res = await fetch('https://api.deepseek.com/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + MY_KEY
+                },
+                body: JSON.stringify({
+                    model: "deepseek-chat",
+                    messages: [{ role: "user", content: msg }]
+                })
+            });
+            const data = await res.json();
+            if(data.choices){
+                history.innerHTML += `<div style="text-align:left; color: blue;"><b>AI：</b>${data.choices[0].message.content}</div>`;
+            } else {
+                history.innerHTML += `<div style="color:red;">接口报错：${JSON.stringify(data)}</div>`;
+            }
+        } catch(e) {
+            history.innerHTML += `<div style="color:red;">请求失败</div>`;
+        }
+    };
+</script>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
