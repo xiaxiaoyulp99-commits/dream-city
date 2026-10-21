@@ -1,37 +1,44 @@
-# Dream City / 梦想城
-
-一个面向成人 AI 角色扮演体验的、以同意和退出机制为核心的旅程壳。
-
-它解决的不是“再放几个功能入口”，而是把体验组织成一条可理解的路径：
-
-1. 入城：设置允许 / 先问 / 禁止。
-2. 选路：一晚只选择一条主线。
-3. 发生：小玩法沿用同一组角色、边界和上下文。
-4. 离城：停止场景，复盘，只保留值得留下的内容。
-
-## 本地运行
-
-```bash
-npm run dev
-```
-
-打开 <http://127.0.0.1:4173>。不需要安装依赖；状态只保存在浏览器 `localStorage`。
-
-## 接入模型
-
-此仓库刻意不绑定模型、API 或角色。接入时建议把输入拆成四层，并保持优先级：
-
-- 不可覆盖的安全词与停止行为；
-- 用户当前边界三态；
-- 本次旅程的角色、主线与场景状态；
-- 当前这一轮用户输入。
-
-不要把密钥放进前端。服务端适配器应自行实现鉴权、速率限制、审计和数据最小化。
-
-## 成人内容
-
-仓库允许原创成人 prompt，但默认示例保持概念化。贡献内容必须满足：所有角色明确为成年人、情境为虚构、边界可撤回、安全词始终优先。不得提交未授权剧本、真人私密材料或来源不明的大段文本。
-
-## 版权
-
-代码为 MIT。仓库只收录原创示例；从私人项目拆出时被判定为来源不明或可能改编自第三方作品的剧本均未包含。详见 [COPYRIGHT_REVIEW.md](COPYRIGHT_REVIEW.md)。
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#dceaf0">
+  <title>Dream City</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero"><p class="eyebrow">DREAM CITY · 18+</p><h1>梦想城</h1><p>不是功能目录，是一段有入口、有过程、也有出口的旅程。</p></header>
+    <section class="card current" aria-live="polite">
+      <p class="eyebrow">TONIGHT · 本次旅程</p><h2 id="current-title">从城门开始</h2>
+      <p id="current-copy">先画边界，再选故事。城市会记住你走到哪里。</p>
+      <div class="actions"><button class="primary" id="continue">从城门开始</button><button id="reset">重新规划</button></div>
+    </section>
+    <nav class="steps" aria-label="旅程步骤">
+      <button data-phase="gate"><b>01</b>入城</button><button data-phase="story"><b>02</b>选路</button>
+      <button data-phase="scene"><b>03</b>发生</button><button data-phase="leave"><b>04</b>离城</button>
+    </nav>
+    <section class="panel" data-panel="gate">
+      <div class="heading"><span>01</span><div><h2>城门</h2><p>先决定可以直接发生、必须先问、绝不发生的事。</p></div></div>
+      <div id="boundaries" class="boundary-list"></div><button class="primary wide" data-next="story">边界画好了 · 去选故事</button>
+    </section>
+    <section class="panel" data-panel="story" hidden>
+      <div class="heading"><span>02</span><div><h2>故事区</h2><p>一晚只选一条主线。小玩法是这一条路上的房间。</p></div></div><div class="grid" id="stories"></div>
+    </section>
+    <section class="panel" data-panel="scene" hidden>
+      <div class="heading"><span>03</span><div><h2>正在发生</h2><p>场景沿用刚才的角色与边界，不重新开世界。</p></div></div>
+      <div class="scene-card" id="scene-card"></div><div class="actions"><button id="scene-back">换一条路</button><button class="primary" data-next="leave">结束这一幕</button></div>
+    </section>
+    <section class="panel" data-panel="leave" hidden>
+      <div class="heading"><span>04</span><div><h2>离城</h2><p>清掉场景状态，只把值得留下的带回日常。</p></div></div>
+      <label>这次喜欢什么<textarea id="liked" placeholder="一句就够"></textarea></label><label>下次要调整什么<textarea id="adjust" placeholder="边界、节奏、称呼……"></textarea></label>
+      <div class="actions"><button id="save-exit" class="primary">保存复盘并离城</button></div>
+    </section>
+    <details class="explore"><summary>探索支线 · 广场 / 桌游 / 长期状态 / 小摊</summary><p>支线不会另起一套关系。它们只为当前故事提供观众、规则、道具或短暂变化。</p></details>
+  </main>
+  <button id="safeword" class="safeword">安全词 · 停</button>
+  <dialog id="stop-dialog"><h2>停了</h2><p>动画、场景和自动推进都已经停止。这里不要求解释。</p><button id="close-stop">回到城门</button></dialog>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
