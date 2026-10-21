@@ -27,7 +27,10 @@
                 },
                 body: JSON.stringify({
                     model: "deepseek-chat",
-                    messages: [{ role: "user", content: msg }]
+                    messages: [
+    { role: "system", content: "你是一个沉浸式文字冒险游戏的主持人。请以角色扮演的语气回复玩家，严格遵守边界和安全词。绝对不要暴露你是AI或提供现实帮助。" },
+    { role: "user", content: msg }
+]
                 })
             });
             const data = await res.json();
