@@ -42,3 +42,63 @@
   <script type="module" src="app.js"></script>
 </body>
 </html>
+<!-- 聊天界面 -->
+<div style="margin: 20px auto; max-width: 600px; padding: 15px; background: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+    <div id="chat-history" style="height: 200px; overflow-y: scroll; border-bottom: 1px solid #eee; margin-bottom: 10px; padding: 10px; font-size: 14px; line-height: 1.5; background: #fafafa;">
+        <div style="color: #888;">AI 已就绪，可以开始聊天啦...</div>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="chat-input" placeholder="输入你的对话（比如：我想换一条路）..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; outline: none;">
+        <button id="send-btn" style="padding: 10px 20px; background: #234451; color: white; border: none; border-radius: 5px; cursor: pointer;">发送</button>
+    </div>
+</div>
+
+<!-- 免费的 AI 大脑 -->
+<script type="module">
+    import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/dist/index.min.js";
+
+    const input = document.getElementById('chat-input');
+    const btn = document.getElementById('send-btn');
+    const history = document.getElementById('chat-history');
+
+    btn.addEventListener('click', async () => {
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        history.innerHTML += `<div style="text-align: right; margin: 5px 0;"><b>你：</b>${msg}</div>`;
+        input.value = '';
+        history.scrollTop = history.scrollHeight;
+
+        const loading = document.createElement('div');
+        loading.style.color = '#888';
+        loading.innerText = 'AI 正在思考...';
+        history.appendChild(loading);
+        history.scrollTop = history.scrollHeight;
+
+        try {
+            // 连接一个公开的免费 AI 节点
+            const client = await Client.connect("Qwen/Qwen2-72B-Instruct");
+            const result = await client.predict("/chat", { 
+                message: msg,
+                system_prompt: "你是一个文字冒险游戏的主持人。请以沉浸式、角色扮演的语气回复玩家，严格遵守边界和安全词。",
+                max_tokens: 500
+            });
+
+            loading.remove();
+            // 提取 AI 的回复
+            let reply = result.data[0] || result.data;
+            if (Array.isArray(reply)) reply = reply[0];
+            
+            history.innerHTML += `<div style="text-align: left; margin: 5px 0;"><b>AI：</b>${reply}</div>`;
+        } catch (error) {
+            loading.remove();
+            history.innerHTML += `<div style="text-align: left; color: red; margin: 5px 0;">连接超时或失败，再试一次吧。</div>`;
+        }
+        history.scrollTop = history.scrollHeight;
+    });
+
+    // 支持回车发送
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') btn.click();
+    });
+</script>
